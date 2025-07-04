@@ -71,5 +71,12 @@ def main():
     print(f"Expected hours until now: {expected_hours_until_now}")
     print(f"Expected hours to end: {expected_hours_to_end}")
 
+    # === DELTAS ===
+    delta_until_now = total_hours + remaining_minutes / 60 - expected_hours_until_now
+    delta_to_end = total_hours + remaining_minutes / 60 - expected_hours_to_end
+
+    print(f"Delta until now: {delta_until_now:.2f} hours")
+    print(f"Delta to end: {delta_to_end:.2f} hours")
+
 if __name__ == "__main__":
     main()
