@@ -1,4 +1,4 @@
-# Análise de Eventos "Estágio" em PDFs de Calendário (Alpha 0.1)
+# Análise de Eventos "Estágio" em PDFs de Calendário (Alpha 0.1) (BROKEN LIB fitz)
 Este projeto analisa arquivos PDF de calendários e extrai eventos relacionados a **"Estágio"**. Ele calcula e compara o total de horas realizadas com o esperado (30 horas semanais).
 ## Utilização
 
