@@ -161,47 +161,51 @@ def edit_input_file():
     def timedelta_to_decimal_hours(td):
         return td.total_seconds() / 3600
 
-    print(f"Total Previsto: {timedelta_to_decimal_hours(expected_hours_until_end_date):.2f} horas")
+    print(f"Total Previsto: {timedelta_to_decimal_hours(expected_hours_until_end_date):.2f} horas (Delta: {timedelta_to_decimal_hours(delta_until_end_date):+.2f} horas)")
     print(f"Total já realizado: {timedelta_to_decimal_hours(total_hours):.2f} horas")
-    print(f"Esperado até hoje: {timedelta_to_decimal_hours(expected_hours_until_today):.2f} horas")
-    print(f"Delta até hoje: {timedelta_to_decimal_hours(delta_until_today):+.2f} horas")
-    print(f"Delta até o previso: {timedelta_to_decimal_hours(delta_until_end_date):+.2f} horas")
+    print(f"Esperado até hoje: {timedelta_to_decimal_hours(expected_hours_until_today):.2f} horas (Delta: {timedelta_to_decimal_hours(delta_until_today):+.2f} horas)")
     print("\n=============================")
 
 def main():
-    root = TkinterDnD.Tk()  # Use TkinterDnD for drag-and-drop functionality
-    root.title("Análise de Estágio")
+    # Executar análise diretamente sem GUI
+    print("Executando análise de estágio sem GUI...")
 
-    # Set window size and position
-    window_width = 600
-    window_height = 400
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-    x_position = (screen_width // 2) - (window_width // 2)
-    y_position = (screen_height // 2) - (window_height // 2)
-    root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+    # Processar arquivo de entrada
+    if os.path.exists(INPUT_FILE):
+        total_minutes = parse_time_entries(INPUT_FILE)
+        total_hours = timedelta(minutes=total_minutes)
 
-    def open_input():
-        edit_input_file()
+        today = datetime.now()
+        start_date = find_start_date(today)
+        end_date = find_end_date(today)
 
-    def on_drop(event):
-        file_paths = root.tk.splitlist(event.data)
-        print("Arquivos arrastados:")
-        for file in file_paths:
-            print(file)
-        process_pdfs(file_paths)
+        expected_hours_until_today = timedelta()
+        current = start_date
+        while current <= today:
+            if current.weekday() < WORK_DAYS_PER_WEEK:
+                expected_hours_until_today += timedelta(hours=WORK_HOURS_PER_DAY)
+            current += timedelta(days=1)
 
-    drag_drop_frame = tk.Frame(root, width=window_width - 50, height=window_height - 100, bg="lightgray")
-    drag_drop_frame.pack(pady=20)
-    drag_drop_frame.pack_propagate(False)
-    tk.Label(drag_drop_frame, text="Analisar Calendario(s)", bg="lightgray", fg="black").pack(expand=True)
+        expected_hours_until_end_date = timedelta()
+        current = start_date
+        while current <= end_date:
+            if current.weekday() < WORK_DAYS_PER_WEEK:
+                expected_hours_until_end_date += timedelta(hours=WORK_HOURS_PER_DAY)
+            current += timedelta(days=1)
 
-    drag_drop_frame.drop_target_register("DND_Files")
-    drag_drop_frame.dnd_bind("<<Drop>>", on_drop)
+        delta_until_today = total_hours - expected_hours_until_today
+        delta_until_end_date = total_hours - expected_hours_until_end_date
 
-    tk.Button(root, text="Inserir via texto", command=open_input).pack(pady=5)
+        print("\n=== RESULTADOS DA ANÁLISE ===")
+        def timedelta_to_decimal_hours(td):
+            return td.total_seconds() / 3600
 
-    root.mainloop()
+        print(f"Total Previsto: {timedelta_to_decimal_hours(expected_hours_until_end_date):.2f} horas (∆ = {timedelta_to_decimal_hours(delta_until_end_date):+.2f} horas)")
+        print(f"Total já realizado: {timedelta_to_decimal_hours(total_hours):.2f} horas")
+        print(f"Esperado até hoje: {timedelta_to_decimal_hours(expected_hours_until_today):.2f} horas (∆ = {timedelta_to_decimal_hours(delta_until_today):+.2f} horas)")
+        print("\n=============================")
+    else:
+        print(f"Arquivo de entrada '{INPUT_FILE}' não encontrado. Por favor, crie o arquivo e insira os dados no formato correto.")
 
 if __name__ == "__main__":
     main()
