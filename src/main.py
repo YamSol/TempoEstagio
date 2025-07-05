@@ -77,10 +77,15 @@ def process_pdfs(file_paths):
         current += timedelta(days=1)
 
     # Resultados
+    print("\n=== RESULTADOS DA ANÁLISE ===")
     print("Eventos encontrados:")
-    print(df[["Nome", "Data-Hora", "Duração"]])
+    if not df.empty:
+        print(df[["Nome", "Data-Hora", "Duração"]].to_string(index=False))
+    else:
+        print("Nenhum evento encontrado.")
     print(f"\nTotal de horas realizadas: {total_hours}")
     print(f"Total de horas esperadas no período: {expected_hours}")
+    print("\n=============================")
 
 def extract_events_from_pdf(file_path, start_date, end_date):
     estagio_pattern = re.compile(r"est[aáâã]g[ií]o", re.IGNORECASE)
@@ -124,10 +129,44 @@ def edit_input_file():
         with open(INPUT_FILE, "w") as f:
             f.write("# Insira os dados no formato: horas,minutos\n")
 
-    root = tk.Tk()
-    root.withdraw()  # Oculta a janela principal
     call(['vim', INPUT_FILE])
-    root.deiconify()  # Mostra a janela principal novamente
+
+    # Após sair do vim, processar e exibir os resultados
+    total_minutes = parse_time_entries(INPUT_FILE)
+    total_hours = timedelta(minutes=total_minutes)
+
+    today = datetime.now()
+    start_date = find_start_date(today)
+    end_date = find_end_date(today)
+
+    expected_hours_until_today = timedelta()
+    current = start_date
+    while current <= today:
+        if current.weekday() < WORK_DAYS_PER_WEEK:
+            expected_hours_until_today += timedelta(hours=WORK_HOURS_PER_DAY)
+        current += timedelta(days=1)
+
+    expected_hours_until_end_date = timedelta()
+    current = start_date
+    while current <= end_date:
+        if current.weekday() < WORK_DAYS_PER_WEEK:
+            expected_hours_until_end_date += timedelta(hours=WORK_HOURS_PER_DAY)
+        current += timedelta(days=1)
+
+    delta_until_today = total_hours - expected_hours_until_today
+    delta_until_end_date = total_hours - expected_hours_until_end_date
+
+    print("\n=== RESULTADOS DA EDIÇÃO ===")
+    # Converter timedelta para horas decimais (ex: 1.5h)
+    def timedelta_to_decimal_hours(td):
+        return td.total_seconds() / 3600
+
+    print(f"Total Previsto: {timedelta_to_decimal_hours(expected_hours_until_end_date):.2f} horas")
+    print(f"Total já realizado: {timedelta_to_decimal_hours(total_hours):.2f} horas")
+    print(f"Esperado até hoje: {timedelta_to_decimal_hours(expected_hours_until_today):.2f} horas")
+    print(f"Delta até hoje: {timedelta_to_decimal_hours(delta_until_today):+.2f} horas")
+    print(f"Delta até o previso: {timedelta_to_decimal_hours(delta_until_end_date):+.2f} horas")
+    print("\n=============================")
 
 def main():
     root = TkinterDnD.Tk()  # Use TkinterDnD for drag-and-drop functionality
