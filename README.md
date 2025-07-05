@@ -22,4 +22,10 @@ Este projeto analisa arquivos PDF de calendários e extrai eventos relacionados 
       python src/analisar_estagios.py
       ```
 
-O script permite selecionar os PDFs, extrai os eventos de estágio e mostra um resumo das horas realizadas.
+Existem dois scripts principais neste projeto:
+
+- **Selecionador de PDFs (`selecionar_pdfs.py`)**: Ao executar este script, uma janela será aberta para que você possa arrastar e soltar os arquivos PDF que deseja analisar. Após a seleção, os arquivos são processados automaticamente para extrair os eventos de estágio e gerar o resumo das horas realizadas.
+
+- **Editor de Entrada (`editor_entrada.py`)**: Basta rodar este script para que o arquivo `input.txt` seja aberto em um editor de código. Faça as edições necessárias e salve o arquivo; o programa será executado automaticamente após o salvamento, processando os dados inseridos.
+
+Ambos os scripts facilitam a análise dos eventos de estágio de acordo com a sua preferência de uso.
